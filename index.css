@@ -1,8 +1,19 @@
 :root {
     --font-style: 'Poppins', sans-serif;
-    --player-space-background-hover: rgb(0 0 0 / 10%);
-    --start-button-background: rgb(0, 150, 255);
-    --start-button-font: rgb(255, 255, 255);
+    
+    /* Sleek Tabletop Palette */
+    --board-container-bg: rgba(255, 255, 255, 0.15);
+    --menu-bg: rgba(0, 0, 0, 0.4);
+    --tile-bg: rgba(255, 255, 255, 0.85);
+    --tile-hover: #e0f2fe; /* Soft blue-gray on hover */
+    
+    /* High-Contrast Marker Colors */
+    --color-x: #dc2626; /* Crimson Red */
+    --color-o: #0284c7; /* Sky Blue */
+    
+    /* Buttons */
+    --btn-bg: #0284c7;
+    --btn-hover: #0369a1;
 }
 
 *,
@@ -14,82 +25,128 @@
 }
 
 html {
-    background: url(./table-bg.jpg);
+    background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%), url(./table-bg.jpg);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     box-sizing: border-box;
     font-family: var(--font-style);
     font-size: 62.5%;
 }
 
 #container {
-    background: rgb(255 255 255 / 30%);
-    background-position: center;
-    border-radius: 25%;
+    background: var(--board-container-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-flow: column nowrap;
     font-size: 1.6rem;
-    height: 95vh;
-    margin: 1% auto;
+    min-height: 80vh;
+    margin: 5vh auto;
     place-content: center;
     place-items: center;
-    width: 50%;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
 }
 
 .menu {
-    border: 5px outset black;
-    border-radius: 25%;
+    background: var(--menu-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     display: flex;
     flex-flow: column nowrap;
-    height: 10vh;
-    margin: 2% auto;
-    padding: 2%;
+    height: auto;
+    min-height: 8vh;
+    margin-bottom: 25px;
+    padding: 15px;
     place-content: center;
     place-items: center;
     text-align: center;
-    width: 40%;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
-#start-button {
-    background-color: var(--start-button-background);
-    border: 1px solid black;
-    border-radius: 10px;
-    box-shadow: 1px 1px 1px 1px black;
-    color: var(--start-button-font);
-    font-size: 3rem;
-    padding: 2%;
+#now-playing, #win-notice {
+    color: #ffffff;
+    font-size: 2.4rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-#start-button:active {
-    transform: translateY(5px);
+#start-button, #reset-button {
+    background-color: var(--btn-bg);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 600;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#start-button:hover, #reset-button:hover {
+    background-color: var(--btn-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 #gameboard {
-    border: 5px solid black;
-    border-radius: 10px;
+    border: 4px solid rgba(0, 0, 0, 0.5);
+    border-radius: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
     display: grid;
-    font-size: 6rem;
-    gap: 3px;
-    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
-    height: 50vh;
-    inline-size: 1em;
-    place-content: center;
-    place-items: center;
-    width: 50%;
+    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    overflow: hidden;
+    
+    /* Turn the gameboard into a container query context */
+    container-type: inline-size;
 }
 
 .player-space {
-    border: 5px outset black;
+    background-color: var(--tile-bg);
+    color: #1e293b;
+    border: none;
     cursor: pointer;
     display: flex;
-    height: 100%;
     place-content: center;
     place-items: center;
-    width: 100%;
+    transition: all 0.15s ease;
+    
+    /* Prevent double-tap zooming on mobile layout environments */
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+
+    /* Dynamic Scaling: font-size automatically evaluates to ~22% of total board width */
+    font-size: 22cqi;
+    font-weight: 800;
 }
 
 .player-space:hover {
-    background: var(--player-space-background-hover);
+    background-color: var(--tile-hover);
 }
 
-.player-space:active {
-    transform: translateY(5px);
+/* Dynamic Marker Colors */
+.player-space.X {
+    color: var(--color-x);
+    text-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.player-space.O {
+    color: var(--color-o);
+    text-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
 }
