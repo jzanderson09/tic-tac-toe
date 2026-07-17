@@ -81,7 +81,6 @@ const ticTacToe = (function () {
         }
     }
 
-    // Synthesizes a low-pitched, harsh double-buzzing "error" sound for draws
     function playDrawSound() {
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -89,9 +88,7 @@ const ticTacToe = (function () {
 
             const ctx = new AudioContext();
             
-            // Generate a quick double pulse (buzz-buzz)
             [0, 0.15].forEach(delay => {
-                // Mix two harsh saw-tooth waves slightly out of tune for a buzzy texture
                 [150, 153].forEach(freq => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -120,21 +117,30 @@ const ticTacToe = (function () {
                 window.speechSynthesis.cancel();
                 
                 const utterance = new SpeechSynthesisUtterance(message);
-                const voices = window.speechSynthesis.getVoices();
-                
-                const preferredVoice = voices.find(voice => 
-                    voice.name === 'Google UK English Male'
-                );
-                
-                if (preferredVoice) {
-                    utterance.voice = preferredVoice;
-                }
-                
                 utterance.rate = 0.9;  
                 utterance.pitch = 1.0; 
                 utterance.volume = 1.0; 
-                
-                window.speechSynthesis.speak(utterance);
+
+                const setVoiceAndSpeak = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    // Explicitly look up British Male engine arrays or fallback dynamically to structural en-GB profiles
+                    const preferredVoice = voices.find(voice => 
+                        voice.name === 'Google UK English Male' || 
+                        (voice.lang.includes('en-GB') && voice.name.toLowerCase().includes('male'))
+                    ) || voices.find(voice => voice.lang.includes('en-GB'));
+
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                    }
+                    window.speechSynthesis.speak(utterance);
+                };
+
+                // Guard against race conditions when browser speech assets haven't cleanly finished staging loops
+                if (window.speechSynthesis.getVoices().length > 0) {
+                    setVoiceAndSpeak();
+                } else {
+                    window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
+                }
             }
         } catch (e) {
             console.warn("Text-to-speech engine failed:", e);
@@ -281,7 +287,6 @@ const ticTacToe = (function () {
         else if (!game.options.includes('')) {
             game.currentGame = false;
             
-            // Play the synchronized error buzz and the voice track together!
             playDrawSound();
             speakWinner("The match has concluded in a stalemate.");
             
